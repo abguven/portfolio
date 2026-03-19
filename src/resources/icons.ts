@@ -10,7 +10,7 @@ import {
   HiOutlineEye,
   HiOutlineEyeSlash,
   HiOutlineDocument,
-  HiOutlineGlobeAsiaAustralia,
+  HiOutlineMapPin,
   HiOutlineRocketLaunch,
 } from "react-icons/hi2";
 
@@ -35,7 +35,7 @@ export const iconLibrary: Record<string, IconType> = {
   arrowUpRight: HiArrowUpRight,
   arrowRight: HiArrowRight,
   email: HiEnvelope,
-  globe: HiOutlineGlobeAsiaAustralia,
+  globe: HiOutlineMapPin,
   person: PiUserCircleDuotone,
   grid: PiGridFourDuotone,
   book: PiBookBookmarkDuotone,

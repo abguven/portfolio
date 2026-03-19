@@ -118,7 +118,7 @@ const effects: EffectsConfig = {
     colorEnd: "page-background",
   },
   dots: {
-    display: true,
+    display: false,
     opacity: 40,
     size: "2",
     color: "brand-background-strong",
@@ -131,12 +131,12 @@ const effects: EffectsConfig = {
     height: "0.25rem",
   },
   lines: {
-    display: false,
+    display: true,
     opacity: 100,
     color: "neutral-alpha-weak",
     size: "16",
     thickness: 1,
-    angle: 45,
+    angle: 60,
   },
 };
 
