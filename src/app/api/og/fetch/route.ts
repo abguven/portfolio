@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { validateExternalUrl } from '@/utils/url-validation';
 
 export const runtime = 'edge';
 
@@ -18,8 +19,8 @@ function decodeHTMLEntities(text: string): string {
     
     if (entity.startsWith('#')) {
       const code = entity.startsWith('#x') ? 
-        parseInt(entity.slice(2), 16) : 
-        parseInt(entity.slice(1), 10);
+        Number.parseInt(entity.slice(2), 16) : 
+        Number.parseInt(entity.slice(1), 10);
       return String.fromCharCode(code);
     }
     
@@ -71,6 +72,11 @@ export async function GET(request: Request) {
 
   if (!url) {
     return NextResponse.json({ error: 'URL is required' }, { status: 400 });
+  }
+
+  const validation = validateExternalUrl(url);
+  if (!validation.valid) {
+    return NextResponse.json({ error: validation.error }, { status: 400 });
   }
 
   try {

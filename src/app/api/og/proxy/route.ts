@@ -1,16 +1,20 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
+import { validateExternalUrl } from '@/utils/url-validation';
 
 export async function GET(request: NextRequest) {
   try {
-    // Get the URL parameter
     const url = new URL(request.url);
     const imageUrl = url.searchParams.get('url');
-    
+
     if (!imageUrl) {
       return NextResponse.json({ error: 'Missing URL parameter' }, { status: 400 });
     }
-    
-    // Fetch the image
+
+    const validation = validateExternalUrl(imageUrl);
+    if (!validation.valid) {
+      return NextResponse.json({ error: validation.error }, { status: 400 });
+    }
+
     const response = await fetch(imageUrl, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (compatible; ImageProxy/1.0)',
