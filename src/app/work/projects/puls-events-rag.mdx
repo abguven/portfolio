@@ -1,0 +1,52 @@
+---
+title: "RAG Event Recommendation Chatbot"
+publishedAt: "2026-01-25"
+summary: "Agentic RAG chatbot recommending Parisian cultural events from natural language queries — Mistral AI, LangChain, and Faiss."
+images:
+  - "/images/projects/p11/cover.png"
+link: "https://github.com/abguven/puls-events-rag-poc"
+tags: ["rag", "langchain", "mistral-ai", "agentic-ai", "faiss", "python", "data-engineering"]
+---
+
+## TL;DR
+
+- **The Problem:** Finding cultural events in Paris requires browsing multiple platforms. A keyword search misses intent — "something chill for a date night" won't match any tag.
+- **The Solution:** An agentic RAG chatbot that understands natural language queries, resolves relative dates ("this weekend", "next Tuesday"), and retrieves semantically relevant events from a live open data source.
+- **The Impact:** A fully operational POC that answers queries in natural language, grounded exclusively in real event data — zero hallucinated venues or dates.
+
+## Demo
+
+<div style={{position: "relative", paddingBottom: "56.25%", height: 0, overflow: "hidden", borderRadius: "12px"}}>
+  <iframe
+    src="https://www.youtube.com/embed/qg4xT153TEM"
+    style={{position: "absolute", top: 0, left: 0, width: "100%", height: "100%", border: 0}}
+    allowFullScreen
+  />
+</div>
+
+## The Architecture
+
+The system is built around three components working in sequence:
+
+**Faiss Vector Store** — Paris events are fetched from the Open Data API, embedded via `mistral-embed`, and indexed locally. Rebuilt on demand via a single command.
+
+**LangChain Agent** — Orchestrates two tools: a retrieval tool that queries Faiss by semantic similarity, and a custom **Date Resolver Tool** that converts relative expressions ("ce week-end", "next Tuesday") into concrete date ranges before the search runs.
+
+**Mistral Large** — Generates natural, contextual responses grounded in the retrieved documents. Instructed never to invent event details — if the data doesn't have it, it says so.
+
+## Engineering Highlights
+
+**Why RAG over a direct API query** — A keyword filter on the Paris Open Data API would return zero results for "something chill for a date night". Vector embeddings capture semantic intent, retrieving thematically relevant events even when the vocabulary doesn't match.
+
+**Agentic date resolution** — Relative date expressions are meaningless without knowing today's date. Rather than patching this in a prompt, a dedicated LangChain tool resolves them to exact date ranges before the retrieval step — keeping the agent's reasoning clean and testable.
+
+**Hallucination prevention by design** — The retrieved event documents are injected as the sole source of truth in the system prompt. The LLM has no knowledge of Paris events outside what the retriever provides — making grounding a structural guarantee, not a prompt instruction.
+
+## Results
+
+- End-to-end pipeline operational: live API ingestion → embedding → Faiss index → natural language response
+- Multilingual date resolution tested in French, English, Turkish, Spanish, and Tatar
+- Streamlit demo deployed for interactive testing
+- Index refresh triggered with a single command
+
+👉 [Explore the complete code and documentation on GitHub.](https://github.com/abguven/puls-events-rag-poc)

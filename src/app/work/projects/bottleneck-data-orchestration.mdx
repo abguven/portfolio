@@ -1,0 +1,48 @@
+---
+title: "Automated Data Orchestration Pipeline"
+publishedAt: "2026-01-09"
+summary: "Fully automated monthly ETL pipeline orchestrated with Kestra — DuckDB analytics, nuclear data quality audits, and automated stakeholder reporting."
+images:
+  - "/images/projects/p10/cover.png"
+link: "https://github.com/abguven/bottleneck-data-orchestration"
+tags: ["kestra", "duckdb", "aws-s3", "python", "etl", "data-pipeline", "data-quality", "pandas", "data-engineering"]
+---
+
+## TL;DR
+
+- **The Problem:** A wine merchant's data team was manually reconciling ERP and web sales data every month, then running ad-hoc analysis to classify wines and build reports — error-prone and time-consuming.
+- **The Solution:** A fully orchestrated ETL pipeline on Kestra that automatically ingests, reconciles, classifies, audits, and delivers reports to stakeholders every month — zero manual steps.
+- **The Impact:** A production-ready pipeline with a "nuclear" quality gate that catches financial inconsistencies before any report is sent.
+
+## The Architecture
+
+A **decoupled architecture** (Storage vs. Compute) — AWS S3 holds the data, Kestra orchestrates the compute, DuckDB does the heavy lifting in-memory:
+
+1. **Ingestion** — Time-partitioned download from S3 (`raw/YYYY/MM`)
+2. **Vital Check** — Fail-fast on missing or empty files before any processing starts
+3. **Processing** — Cleaning, deduplication, and reconciliation via DuckDB SQL
+4. **Analysis** — Z-Score statistical classification (Premium vs. Ordinary wines) via a custom Dockerized Python script
+5. **Quality Audit** — Nuclear gate: cross-checks between raw inputs and final outputs
+6. **Reporting** — Automated Excel and CSV delivery via SMTP
+
+Scheduled on the **15th of every month at 09:00 (Europe/Paris)**.
+
+![Architecture diagram](https://raw.githubusercontent.com/abguven/bottleneck-data-orchestration/main/assets/Architecture%20Pipeline.drawio.png)
+
+## Engineering Highlights
+
+**"Nuclear" quality audit** — Basic row count checks are not enough for financial data. The gate verifies that total turnover from the reconciled dataset equals the sum of individual product revenues. Any discrepancy fails the pipeline before a report is sent.
+
+**Custom 90MB Docker image** — Standard data science images are 1GB+. A custom multi-stage build with only pandas and openpyxl weighs **90MB** — faster spin-up, minimal attack surface, no root access. Published on Docker Hub as [abguven/pandas-openpyxl](https://hub.docker.com/r/abguven/pandas-openpyxl).
+
+**DuckDB as the transformation engine** — No running database service required. DuckDB reads directly from S3/CSV, runs complex SQL joins in-memory, and writes results — dramatically simplifying the infrastructure.
+
+**Kestra secrets management** — `SECRET_` prefix for Base64-encoded credentials, `ENV_` for standard variables. Credentials never appear in plain text in pipeline logs.
+
+## Results
+
+- Fully automated monthly pipeline — zero manual steps from ingestion to stakeholder inbox
+- Fail-Fast + exponential backoff on transient failures
+- Automated dual notifications: success email with attached reports, instant failure alert with diagnostic logs
+
+👉 [Explore the complete code and documentation on GitHub.](https://github.com/abguven/bottleneck-data-orchestration)

@@ -1,0 +1,52 @@
+---
+title: "Building Energy Prediction API"
+publishedAt: "2025-11-09"
+summary: "End-to-end ML pipeline predicting commercial building energy consumption from structural features, served via a BentoML REST API deployed on AWS App Runner with Terraform."
+images:
+  - "/images/projects/p6/cover.png"
+link: "https://github.com/abguven/building-energy-prediction-api"
+tags: ["bentoml", "terraform", "aws", "scikit-learn", "machine-learning", "pydantic", "python", "rest-api", "data-engineering"]
+---
+
+## TL;DR
+
+- **The Problem:** Energy surveys of commercial buildings are expensive and slow — leaving large gaps in a city's carbon footprint data.
+- **The Solution:** A Random Forest model trained on structural features (size, usage type, age) that estimates annual energy consumption without any meter readings, served as a live REST API on AWS.
+- **The Impact:** R²=0.638 on test data, R²=0.5605 on fully unseen 2017 data — and a scikit-learn bug discovered and fixed upstream in the process.
+
+## The Architecture
+
+From a Jupyter notebook to a live HTTPS endpoint, fully managed by Terraform:
+
+- **Training** — 3,376 building records → 5-step filtering pipeline → ~1,590 clean records → 12 features → Random Forest
+- **Serving** — BentoML packages the model + custom transformers → Docker image → AWS ECR → AWS App Runner
+- **IaC** — Terraform split into two modules: `infra/` (ECR + IAM, applied once) and `service/` (App Runner, destroyed between sessions to avoid per-second billing)
+
+![End-to-end architecture](https://raw.githubusercontent.com/abguven/building-energy-prediction-api/main/assets/architecture_diagram.png)
+
+![Feature importance](https://raw.githubusercontent.com/abguven/building-energy-prediction-api/main/assets/feature_importance.png)
+
+Building floor area alone accounts for **66% of predictive power**.
+
+## Engineering Highlights
+
+**Data leakage prevention** — Columns like `Electricity(kBtu)` are direct components of the target variable. Including them would produce a near-perfect but useless model. Binary structural flags (`uses_electricity`, `uses_natural_gas`) were created instead — indicating infrastructure presence, not consumption.
+
+**The `transformers.py` duplication constraint** — sklearn serializes the custom `FeatureDropper` transformer with its full import path. At BentoML serving time, the working directory is `bentoml_service/` — not the notebook directory. Both copies must stay identical or the service crashes at startup with `ModuleNotFoundError`.
+
+**Open source contribution to scikit-learn** — Discovered a bug in `OneHotEncoder` where `handle_unknown='warn'` was silently mapping unknown categories to all-zero vectors instead of the infrequent bucket. Reported as [scikit-learn#32589](https://github.com/scikit-learn/scikit-learn/issues/32589), fixed in PR #32592, merged into scikit-learn 1.8.
+
+**Terraform deployment sequencing** — App Runner pulls the container image immediately on service creation. If the ECR image doesn't exist yet, the service enters `CREATE_FAILED` with no useful error. The two-module Terraform split enforces the correct order: ECR first, image push, then App Runner.
+
+## Results
+
+| Model | R² Test | R² Train |
+|---|---|---|
+| **Random Forest** | **0.638** | 0.943 |
+| SVR | 0.615 | 0.934 |
+| Linear Regression | 0.558 | 0.621 |
+| Dummy baseline | -0.003 | 0.000 |
+
+Out-of-sample validation on **2017 data** (entirely unseen): **R²=0.5605** — consistent year-over-year generalization confirmed.
+
+👉 [Explore the complete code and documentation on GitHub.](https://github.com/abguven/building-energy-prediction-api)

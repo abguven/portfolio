@@ -1,4 +1,5 @@
 import { MDXRemote, MDXRemoteProps } from "next-mdx-remote/rsc";
+import remarkGfm from "remark-gfm";
 import React, { ReactNode } from "react";
 import { slugify as transliterate } from "transliteration";
 
@@ -162,6 +163,32 @@ function createListItem({ children }: { children: ReactNode }) {
   );
 }
 
+function createTable({ children }: { children: ReactNode }) {
+  return (
+    <div style={{ overflowX: "auto", marginTop: "16px", marginBottom: "16px" }}>
+      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "14px" }}>
+        {children}
+      </table>
+    </div>
+  );
+}
+
+function createTh({ children }: { children: ReactNode }) {
+  return (
+    <th style={{ padding: "8px 12px", textAlign: "left", borderBottom: "2px solid var(--neutral-alpha-medium)", fontWeight: 600 }}>
+      {children}
+    </th>
+  );
+}
+
+function createTd({ children }: { children: ReactNode }) {
+  return (
+    <td style={{ padding: "8px 12px", borderBottom: "1px solid var(--neutral-alpha-weak)" }}>
+      {children}
+    </td>
+  );
+}
+
 function createHR() {
   return (
     <Row fillWidth horizontal="center">
@@ -186,6 +213,9 @@ const components = {
   ul: createList("ul") as any,
   li: createListItem as any,
   hr: createHR as any,
+  table: createTable as any,
+  th: createTh as any,
+  td: createTd as any,
   Heading,
   Text,
   CodeBlock,
@@ -209,5 +239,5 @@ type CustomMDXProps = MDXRemoteProps & {
 };
 
 export function CustomMDX(props: CustomMDXProps) {
-  return <MDXRemote options={{ blockJS: false }} {...props} components={{ ...components, ...(props.components || {}) }} />;
+  return <MDXRemote options={{ blockJS: false, mdxOptions: { remarkPlugins: [remarkGfm] } }} {...props} components={{ ...components, ...(props.components || {}) }} />;
 }

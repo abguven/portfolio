@@ -1,104 +1,60 @@
 ---
-title: "Quantitative Market Scoring for EdTech International Expansion"
-publishedAt: "2025-01-01"
+title: "EdTech Market Scoring"
+publishedAt: "2025-07-22"
 summary: "Turning 886,930 rows of World Bank data into 5 actionable market recommendations through a 3-stage indicator selection pipeline and a weighted scoring model."
 images:
   - "/images/projects/p2/cover.png"
-  - "/images/projects/p2/slider_1.jpg"
-  - "/images/projects/p2/slider_2.jpg"
-tag: "Data Analysis"
-team:
-  - name: "Abdulkadir GUVEN"
-    role: "Data Engineer"
-    avatar: "/images/avatar.jpg"
-    linkedIn: ""
 link: "https://github.com/abguven/edtech-market-expansion-eda"
+tags: ["python", "pandas", "scikit-learn", "exploratory-data-analysis", "data-visualization", "seaborn", "world-bank-data", "data-engineering"]
 ---
 
-## Overview
+## TL;DR
 
-Simulated business case — **"Academy"** is a fictional EdTech startup offering online courses for high school and university students. Facing a strategic expansion decision, the data team received the following mandate:
+- **The Problem:** An EdTech startup needed to identify the top international markets for expansion — out of 195 countries and 3,665 indicators covering every measurable dimension of global education from 1970 to 2100.
+- **The Solution:** A 3-stage indicator selection pipeline (business filter → data quality filter → statistical filter) that reduced 3,665 indicators to 6 independent, business-relevant signals, then scored every country on a weighted composite index.
+- **The Impact:** 5 actionable market recommendations across two strategic profiles — one volume market and four quality markets.
 
-> *"Which countries have the highest potential student base for our platform — and how will that potential evolve?"*
+## The 3-Stage Pipeline
 
-The raw material: the **World Bank EdStats dataset** — 5 CSV files, **886,930 rows** in the main file alone, and **3,665 indicators** covering every measurable dimension of global education from 1970 to 2100. No pre-selection, no pre-defined targets.
+![Indicator selection funnel — 3,665 → 15 → 6](/images/projects/p2/pipeline_funnel.png)
 
-## The 3-Stage Indicator Pipeline
+**Stage 1 — Business Filter** — Retained only indicators directly relevant to the EdTech question: internet infrastructure (can users connect?), population dynamics (is the youth market growing?), and education expenditure (does society already invest in education?).
 
-The core challenge wasn't the analysis itself — it was **taming the scope**. A 3-stage filtering pipeline reduced 3,665 indicators to 6 statistically independent, business-relevant signals.
+**Stage 2 — Data Quality Filter** — The dataset stores year-2100 projections in the exact same format as real observed data — with no flag differentiating them. Profiling fill rates by year revealed a structural break at 2018 where completeness collapses from ~30% to ~7%. Everything from 2020 onwards was excluded. The **2013–2017 window** delivered the best balance between recency and completeness.
 
-![Indicator selection pipeline — 3,665 → 3,120 → 15 → 6](/images/projects/p2/pipeline_funnel.png)
+**Stage 3 — Statistical Filter** — Spearman correlation detected redundancy. Any pair with |r| > 0.70 was flagged; the less business-relevant indicator was dropped. Result: 6 statistically independent signals.
 
-### Stage 1 — Business Filter
+![Correlation after deduplication — 6×6, near-zero off-diagonal](/images/projects/p2/correlation_after.png)
 
-Retained only indicator categories directly relevant to the EdTech business question:
-- **Infrastructure / Communications** — Can users actually connect to the platform?
-- **Health / Population Dynamics** — Is the target youth market growing?
-- **Education Expenditures** — Do societies already invest in education?
+## Scoring Model
 
-### Stage 2 — Data Quality Filter
-
-The dataset contains projections up to **year 2100**, stored in the exact same format as real observed data. Without profiling, these hypothetical values would have silently polluted the analysis.
-
-**Decision:** Excluded all future projections (2020–2100). The **2013–2017 window** delivered the best balance between recency and data completeness.
-
-![Fill rate by year — historical data peaks at 2013–2017](/images/projects/p2/fill_rate_past_years.png)
-
-![Future projections fill rate — uniformly ~7% across 2020–2100](/images/projects/p2/fill_rate_future_years.png)
-
-![Top 15 indicators by fill rate](/images/projects/p2/indicator_fill_rate.png)
-
-### Stage 3 — Statistical Filter
-
-Applied **Spearman correlation** to detect redundancy. Any pair with |r| > 0.70 was flagged; the less business-relevant indicator was dropped.
-
-![Spearman correlation before deduplication — 15×15 matrix](/images/projects/p2/correlation_before.png)
-
-![Spearman correlation after deduplication — 6×6 matrix, near-zero off-diagonal](/images/projects/p2/correlation_after.png)
-
-## Scoring Model & Results
-
-Each country received a **weighted potential score** via a normalized weighted average of 5 retained indicators (MinMaxScaler from Scikit-learn).
+Each country scored via a normalized weighted average (MinMaxScaler), with every weight explicitly justified:
 
 | Indicator | Meaning | Weight |
 |-----------|---------|--------|
-| `IT.NET.USER.P2` | Internet users per 100 people | **35%** |
-| `SP.POP.TOTL` | Total population | **25%** |
-| `SP.POP.1564.TO.ZS` | Population ages 15–64 (%) | **15%** |
-| `SP.POP.GROW` | Annual population growth (%) | **15%** |
-| `SE.COM.DURS` | Duration of compulsory education | **10%** |
+| `IT.NET.USER.P2` | Internet users per 100 people | **35%** — eliminatory criterion |
+| `SP.POP.TOTL` | Total population | **25%** — total addressable market |
+| `SP.POP.1564.TO.ZS` | Population ages 15–64 (%) | **15%** — future student pool |
+| `SP.POP.GROW` | Annual population growth (%) | **15%** — market dynamism |
+| `SE.COM.DURS` | Duration of compulsory education | **10%** — education culture proxy |
 
-> `SL.UEM.TOTL.ZS` (unemployment) was deliberately excluded: it can indicate both instability and demand for retraining. Including it would have introduced noise rather than signal.
+> `SL.UEM.TOTL.ZS` (unemployment) deliberately excluded — it can signal both instability and demand for retraining. Including it would have introduced noise rather than signal.
 
-![Top 5 countries by EdTech market potential score](/images/projects/p2/top5_countries.png)
+![Top 5 countries by market potential score](/images/projects/p2/top5_countries.png)
 
-### Two Strategic Market Profiles
+## Results — Two Strategic Profiles
 
 | Profile | Countries | Key driver |
 |---------|-----------|------------|
-| **Volume market** | China | Colossal population — even a tiny market share represents massive absolute revenue |
-| **Quality markets** | Luxembourg, UK, Iceland, Norway | High internet penetration + strong education culture — easier to convert, higher LTV |
+| **Volume market** | China | Colossal population — even a tiny share = massive revenue |
+| **Quality markets** | Luxembourg, UK, Iceland, Norway | High internet penetration + strong education culture |
 
-## Technical Challenges
+## Engineering Highlights
 
-**Future projections hidden inside historical data** — The dataset stores year-2100 projections with no flag differentiating them from real observations. Profiling fill rates by year revealed a structural break at 2018 where completeness collapses from ~30% to ~7%.
+**"Fake countries" contaminating the dataset** — `EdStatsCountry` contains regional aggregates ("World", "Sub-Saharan Africa", "Low income") alongside sovereign nations. Including them would have inflated population metrics. Filtered via the `Region` column — aggregates have no region assigned.
 
-**3,665 indicators to a non-redundant shortlist** — Manual review is not feasible. Built a systematic 3-stage pipeline — business relevance → data completeness → statistical independence. Every cut is documented and reproducible.
+**Transparent, defensible scoring model** — Every weight is documented with a business justification. The model is fully parameterized — changing a weight is a one-line edit, making it trivial to re-run for a Top 10 or with alternative strategic assumptions. No black boxes.
 
-**"Fake countries" contaminating the dataset** — `EdStatsCountry` contains regional and income-group aggregates ("World", "Sub-Saharan Africa") alongside sovereign nations. Filtered using the `Region` column (aggregates have no region assigned).
+**Missing values without imputation** — Temporal aggregation (mean per country-indicator across 2013–2017) rather than imputation. Countries with fewer than 2 valid years were flagged but retained — keeping the dataset honest rather than artificially complete.
 
-**Transparent, defensible scoring model** — Every weight is explicitly justified. The model is fully parameterized — changing a weight is a one-line edit, making it trivial to re-run for a Top 10 or with alternative strategic assumptions.
-
-**Missing values without imputation** — Used temporal aggregation (mean per country-indicator pair across 2013–2017) rather than imputation. Countries with fewer than 2 valid years were flagged but retained.
-
-## Tech Stack
-
-| Layer | Tool |
-|-------|------|
-| Language | Python 3.13 |
-| Data manipulation | Pandas 2.x, NumPy 2.x |
-| Visualization | Seaborn, Matplotlib |
-| Missing data viz | Missingno |
-| Notebook | JupyterLab |
-| Environment | Poetry |
-| Normalization | Scikit-learn (MinMaxScaler) |
+👉 [Explore the complete code and documentation on GitHub.](https://github.com/abguven/edtech-market-expansion-eda)

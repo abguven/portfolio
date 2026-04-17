@@ -1,0 +1,45 @@
+---
+title: "MongoDB Distributed Data Platform"
+publishedAt: "2025-11-20"
+summary: "From emergency database recovery to a production-grade geo-distributed MongoDB cluster — ReplicaSet HA, Tag-Aware Sharding, and Power BI analytics on 105K Airbnb listings."
+images:
+  - "/images/projects/p7/cover.png"
+link: "https://github.com/abguven/mongodb-nosql-airbnb"
+tags: ["mongodb", "sharding", "replicaset", "polars", "docker", "python", "powerbi", "data-engineering"]
+---
+
+## TL;DR
+
+- **The Problem:** A production MongoDB instance crashed with no replication, no redundancy — total single point of failure. The data was needed urgently for a public report on the Olympic Games' impact on Parisian housing.
+- **The Solution:** Emergency recovery first, then a full architecture redesign: ReplicaSet for high availability, followed by a geo-distributed sharded cluster with total data isolation between Paris and Lyon.
+- **The Impact:** 105,858 listings restored and queryable, a Power BI dashboard for analysts, and an architecture that cannot fail the same way twice.
+
+## The Architecture
+
+Three phases, each building on the previous:
+
+**Phase 1 — Restore & Analyze** — Paris backup (95,885 listings) and Lyon dataset (9,973 listings) imported into MongoDB. Polars-based statistical analysis performed, results exposed via Power BI through three MongoDB views (`view_kpis`, `view_property_types`, `view_heavy_hosts`).
+
+**Phase 2a — ReplicaSet** — A 3-node PSS topology (`rs_noscites`) deployed via Docker Compose. PSS (Primary + 2 Secondaries) chosen over PSA — an Arbiter holds no data, leaving the set with no redundancy on a Secondary failure. Given the prior crash context, PSS was the only defensible choice.
+
+![ReplicaSet architecture](https://raw.githubusercontent.com/abguven/mongodb-nosql-airbnb/main/assets/replicaset_pss_architecture.png)
+
+**Phase 2b — Sharded Cluster** — Paris and Lyon merged into a unified `listings` collection with **Tag-Aware Sharding** on `city`. Each city's data lives exclusively on its own geographic shard — Paris queries never touch the Lyon shard.
+
+![Sharded cluster architecture](https://raw.githubusercontent.com/abguven/mongodb-nosql-airbnb/main/assets/sharded_cluster_architecture.png)
+
+## Engineering Highlights
+
+**Tag-Aware Sharding over hash-based** — Hash sharding on `_id` would randomly scatter Paris and Lyon data across both shards. Zone sharding on `city` guarantees targeted queries, data sovereignty, and local team performance — at the cost of intentional imbalance (90% Paris / 10% Lyon), which is acceptable given the business requirement.
+
+**MongoDB Aggregation vs. Polars** — MongoDB handles most queries well, but computing statistical medians and monthly booking rates across 95k+ documents required moving data into Polars for columnar in-memory processing. Knowing which tool to use — and when to switch — was the key decision.
+
+**Pragmatic data cleaning** — `price` was stored as `"$120.00"`, rates as `"75%"`, `host_verifications` as string representations of arrays. Since no analysis queries depended on these fields, cleaning was intentionally deferred. A pragmatic call: avoid unnecessary transformations when the data isn't needed in a cleaner form.
+
+## Results
+
+- 105,858 listings fully restored and queryable
+- ReplicaSet and Sharded Cluster both operational and validated
+- Power BI dashboard connected via MongoDB BI Connector
+
+👉 [Explore the complete code and documentation on GitHub.](https://github.com/abguven/mongodb-nosql-airbnb)

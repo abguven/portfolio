@@ -1,0 +1,60 @@
+---
+title: "Data Summarizer for LLMs"
+publishedAt: "2025-12-29"
+summary: "CLI tool that generates compact, context-rich dataset summaries for LLM context injection — privacy-first, runs entirely locally via Docker, powered by Polars."
+images:
+  - "/images/projects/perso/cover.png"
+link: "https://github.com/abguven/data-summarizer-llm"
+tags: ["llms", "context-injection", "data-profiling", "polars", "docker", "python", "cli", "automation", "data-engineering"]
+---
+
+<div style={{display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "16px"}}>
+  <img style={{height: "20px"}} src="https://badgen.net/docker/pulls/abguven/data-summarizer?icon=docker&label=pulls" alt="Docker Pulls" />
+  <img style={{height: "20px"}} src="https://badgen.net/docker/size/abguven/data-summarizer/latest?icon=docker&label=image%20size" alt="Image Size" />
+  <img style={{height: "20px"}} src="https://github.com/abguven/data-summarizer-llm/actions/workflows/ci.yml/badge.svg" alt="CI" />
+  <img style={{height: "20px"}} src="https://img.shields.io/badge/License-MIT-green" alt="License" />
+</div>
+
+## TL;DR
+
+- **The Problem:** Sharing a CSV with an LLM means uploading sensitive data to external servers — and wasting thousands of context tokens on raw rows the model doesn't need.
+- **The Solution:** A local CLI tool that profiles any dataset into a compact Markdown summary (column types, missing rates, distributions, sample values) ready to paste directly into any LLM prompt.
+- **The Impact:** A 90MB Docker image that processes an entire folder in one command, with no network calls, no data leaving the machine, and full support for CSV, Parquet, JSON, and Excel.
+
+## How It Works
+
+```
+Input folder → Polars profiler → SUMMARY_<filename>.md per file
+```
+
+For each file, the tool computes per-column statistics and emits a single Markdown row:
+
+```
+| age | Int64 | 2.0% missing | 45 unique | Min:18 Max:75 Avg:42 ▂▃▅█▅▃▂ | 25, 30, 35 |
+```
+
+The histogram sparkline gives an instant visual distribution without any rendering. The full summary drops directly into any LLM prompt as structured context.
+
+![Architecture schema](https://raw.githubusercontent.com/abguven/data-summarizer-llm/main/assets/architecture_schema.png)
+
+## Engineering Highlights
+
+**Privacy by design, not as an afterthought** — The entire processing pipeline is local and in-memory. The container has zero network access requirements — it runs in fully air-gapped environments. No API keys, no telemetry, no data exfiltration surface.
+
+**Polars over pandas** — Polars' Rust-based columnar engine handles large files significantly faster than pandas. For a profiling tool that processes files that can reach hundreds of MB, speed is not optional.
+
+**Non-root container** — Running Docker containers as root is a common security anti-pattern. A dedicated `appuser` is created at build time — if the app is ever compromised, the attacker is limited to that user's permissions rather than having root access to the host.
+
+**90MB image via multi-stage build** — A two-stage Dockerfile separates dependency installation from the runtime layer. Final image includes only Polars + format readers — nothing beyond what the CLI needs to run.
+
+## Results
+
+| Metric | Value |
+|---|---|
+| Published image | `abguven/data-summarizer` on Docker Hub |
+| Image size | ~90MB |
+| Supported formats | CSV, Parquet, JSON, XLSX, XLS |
+| Processing mode | Batch — full folder in one command |
+| CI | GitHub Actions — tests on PRs to main, releases on `v*` tags |
+
+👉 [Explore the complete code and documentation on GitHub.](https://github.com/abguven/data-summarizer-llm)

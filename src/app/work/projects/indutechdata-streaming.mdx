@@ -1,0 +1,52 @@
+---
+title: "Real-Time IoT Streaming Pipeline"
+publishedAt: "2025-12-26"
+summary: "Hybrid cloud architecture design for industrial IoT at scale, validated by a real-time streaming ETL POC using Redpanda and Apache Spark."
+images:
+  - "/images/projects/p9/cover.png"
+link: "https://github.com/abguven/InduTechData"
+tags: ["apache-spark", "redpanda", "pyspark", "data-streaming", "real-time", "etl", "data-pipeline", "data-engineering"]
+---
+
+## TL;DR
+
+- **The Problem:** An industrial company needed to modernize its legacy system to handle 50 GB/month of IoT data and 40 TB of historical data — while keeping its on-premise factory infrastructure and SQL Server ERP in the loop.
+- **The Solution:** A two-part deliverable: a detailed hybrid AWS cloud architecture design, and a containerized streaming ETL POC that validates the Redpanda + Spark stack before committing to full deployment.
+- **The Impact:** A fully documented architecture blueprint and a working POC with real-time lag monitoring between producer and data lake.
+
+## The Architecture
+
+**Part 1 — Hybrid Cloud Design**
+
+A production-grade AWS architecture bridging the factory floor and the cloud:
+
+- **Ingestion**: Redpanda (Kafka-compatible, C++ native) for high-throughput IoT event streaming
+- **Storage**: Data Lake on S3 (raw IoT) + Data Warehouse on Redshift (analytics)
+- **Interoperability**: Redshift Spectrum cross-queries hot IoT data and cold ERP data without data movement
+- **Security**: VPN Site-to-Site + Active Directory Trust Relationship for identity federation
+
+![Cloud architecture diagram](https://raw.githubusercontent.com/abguven/InduTechData/main/assets/P9_Choix_de_composants.png)
+
+**Part 2 — Streaming ETL POC**
+
+A locally deployable proof-of-concept validating the core stack:
+
+- Python producer generates realistic JSON support tickets via Faker
+- Spark Structured Streaming consumes from Redpanda, enforces schema, enriches records, and writes Parquet with checkpointing
+- Real-time monitoring script measures lag between producer output and data lake ingestion
+
+## Engineering Highlights
+
+**Redpanda over Kafka for edge deployments** — Kafka's JVM overhead is a real constraint on factory-edge hardware. Redpanda's C++ native implementation delivers the full Kafka API with lower latency and a lighter footprint — no JVM to manage at the broker level.
+
+**Graceful shutdown with checkpoint integrity** — Docker `SIGTERM` signals must be caught by the Spark job to flush pending micro-batches before the container stops. Without this, the next run reprocesses already-handled events and corrupts the checkpoint state.
+
+**Single optimized Docker image for Python + Java + Spark** — Multi-stage build that packages PySpark with its Java dependencies into one container, keeping the image manageable and the stack reproducible with a single `docker compose up`.
+
+## Results
+
+- Full Redpanda → Spark → Parquet pipeline validated end-to-end
+- Graceful shutdown confirmed — zero checkpoint corruption on container restart
+- Real-time monitoring dashboard tracking producer vs. data lake lag
+
+👉 [Explore the complete code and documentation on GitHub.](https://github.com/abguven/InduTechData)

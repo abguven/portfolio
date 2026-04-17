@@ -1,0 +1,55 @@
+---
+title: "OLAP Revenue Forensics"
+publishedAt: "2025-09-12"
+summary: "Forensic audit that traced a €9,057 revenue discrepancy in an OLAP cube to late-arriving transactions — Python ETL, PostgreSQL star schema & SQL log analysis."
+images:
+  - "/images/projects/p4/cover.png"
+link: "https://github.com/abguven/olap-revenue-forensics"
+tags: ["olap", "postgresql", "sql", "star-schema", "forensic-analysis", "data-audit", "python", "data-engineering"]
+---
+
+## TL;DR
+
+- **The Problem:** A BI team's daily revenue KPI was silently changing days after the fact. Same date, two different values depending on when you looked — and the store was **closed** on the day the change happened.
+- **The Solution:** A full forensic audit — reverse-engineer the OLAP architecture, build a PostgreSQL star schema POC, cross-reference 207,489 log entries, and prove the exact source of the discrepancy.
+- **The Impact:** Root cause identified to the cent: **€9,057.29** traced to 6,895 rogue INSERT operations on a closed day, plus a stress test proving the legacy model could silently inflate revenue by **€42,663** after a simple price update.
+
+## The Evidence
+
+| Date of Reading | Reporting Date | Revenue |
+|:---:|:---:|---:|
+| Aug 14, 2024 | Aug 14, 2024 | €275,186.59 |
+| Aug 16, 2024 | Aug 14, 2024 | **€284,243.88** |
+
+The store was closed on Aug 15. Historical revenue for Aug 14 had changed. No one could explain why.
+
+## The Investigation
+
+**Phase 1 — Model the data** — Reverse-engineered the flat OLAP extract into a proper star schema, loaded into a local PostgreSQL prototype via Python ETL.
+
+![Star schema](https://raw.githubusercontent.com/abguven/olap-revenue-forensics/main/assets/star_schema.png)
+
+**Phase 2 — Forensic log analysis** — 207,489 activity log entries cross-referenced with sales data to identify when, what, and who inserted data on a closed day.
+
+![Forensic analysis](https://raw.githubusercontent.com/abguven/olap-revenue-forensics/main/assets/late_sales_analysis.png)
+
+**Phase 3 — Architectural fix** — Enriched `fact_sales` with frozen price snapshots and a `transaction_type` flag to make late adjustments permanently visible and prevent silent historical rewrites.
+
+## The Smoking Gun
+
+**6,895 INSERT operations on Aug 15** — a closed day — on `fact_sales`. Tracing those inserts yielded exactly **€9,057.29**. The OLAP cube was behaving like a mutable OLTP system, silently overwriting historical data with no audit trail.
+
+**Stress test:** A controlled `BEGIN/ROLLBACK` simulation — 15% price increase on all products — proved the legacy model's revenue inflated by **€42,663** without a single actual sale occurring. The new model showed zero delta.
+
+| Method | Revenue | Delta |
+|---|---:|---:|
+| Legacy (JOIN on dim_products) | €326,907.56 | **+€42,663** |
+| New (frozen price snapshot) | €284,243.88 | **0.00** |
+
+## Engineering Highlights
+
+**Excel silently corrupting data in three different ways** — EAN barcodes converted to scientific notation (`1.23E+12`), dates stored as serial numbers (`45153`), and prices auto-formatted as dates (`1.8` → `August 1st`). Each required a separate detection and parsing strategy before any data could reach the database.
+
+**Rogue integration user** — Log analysis revealed 99.9% of all destructive operations were performed by a single service account with an invalid 33-character ID — a clear GDPR and audit compliance violation. Identified, renamed, and flagged.
+
+👉 [Explore the complete code and documentation on GitHub.](https://github.com/abguven/olap-revenue-forensics)

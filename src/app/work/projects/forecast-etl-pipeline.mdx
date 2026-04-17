@@ -1,0 +1,48 @@
+---
+title: "Weather Data ETL Pipeline"
+publishedAt: "2025-12-14"
+summary: "Robust ETL pipeline aggregating heterogeneous weather data (JSON/Excel) into a MongoDB Data Lake on AWS ECS — with Pydantic data quality gates, idempotency, and monitoring."
+images:
+  - "/images/projects/p8/cover.png"
+link: "https://github.com/abguven/forecast-etl-pipeline"
+tags: ["aws", "aws-lambda", "mongodb", "pydantic", "airbyte", "docker", "python", "etl", "data-engineering"]
+---
+
+## TL;DR
+
+- **The Problem:** A renewable electricity provider needed to centralize weather data from two incompatible sources — clean API JSON feeds and complex multi-tab amateur Excel workbooks where dates are hidden in sheet names.
+- **The Solution:** A hybrid ELT pipeline on AWS with a Lambda preprocessing layer, Airbyte ingestion, and a containerized Python ETL that validates, transforms, and loads data into a MongoDB Data Lake with full idempotency.
+- **The Impact:** Zero duplicates across re-runs, unit conversions validated to the 3rd decimal, and a CloudWatch dashboard tracking inserted vs. rejected records in real time.
+
+## The Architecture
+
+![Pipeline architecture](https://raw.githubusercontent.com/abguven/forecast-etl-pipeline/main/docs/assets/architecture_data_pipeline.png)
+
+Four stages deployed on AWS:
+
+1. **Landing Zone** — AWS Lambda normalizes incoming Excel files (tab extraction → standardized CSV) before ingestion
+2. **Ingestion** — Airbyte synchronizes the Landing Zone to the S3 Raw Data Lake
+3. **ETL** — Containerized Python script transforms, validates via Pydantic, and loads to MongoDB
+4. **Monitoring** — CloudWatch dashboard tracks inserted vs. rejected volumes per run
+
+Key design decisions:
+- **Lookback Window** — only processes new S3 files, not the full dataset on each run
+- **Idempotent UPSERTs** — composite index on `station_id + timestamp_utc` prevents duplicates across re-runs
+- **Dead Letter Queue** — invalid records routed to S3/Rejects, never silently dropped
+
+## Engineering Highlights
+
+**Dates hidden in Excel tab names** — Amateur weather station workbooks stored measurement dates as sheet names, not data columns. Timestamps had to be reconstructed by parsing the sheet name and combining it with the time fields inside. Without this, all records would have been timestampless.
+
+**Imperial → Metric unit conversions** — °F, inHg, and mph had to be converted with full precision. A manual cross-validation against Excel formulas confirmed Python transformations accurate to the **3rd decimal place**.
+
+**Pydantic as a hard quality gate** — Rather than logging bad records and continuing, Pydantic validation rejects malformed records to S3/Rejects before any MongoDB write. This provides a full audit trail and prevents silent corruption downstream.
+
+## Results
+
+- End-to-end pipeline from two incompatible source types to a unified, queryable MongoDB Data Lake
+- Zero duplicates confirmed across multiple re-run tests
+- Unit conversion precision validated to the 3rd decimal
+- CloudWatch dashboard tracking inserted vs. rejected volumes in real time
+
+👉 [Explore the complete code and documentation on GitHub.](https://github.com/abguven/forecast-etl-pipeline)

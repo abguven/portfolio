@@ -3,22 +3,19 @@ import { getPosts } from "@/utils/utils";
 import {
   Meta,
   Schema,
-  AvatarGroup,
-  Button,
   Column,
   Flex,
   Heading,
   Media,
+  Tag,
   Text,
   SmartLink,
-  Row,
-  Avatar,
   Line,
 } from "@once-ui-system/core";
 import { baseURL, about, person, work } from "@/resources";
 import { formatDate } from "@/utils/formatDate";
 import { ScrollToHash, CustomMDX } from "@/components";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import { Projects } from "@/components/work/Projects";
 
 export async function generateStaticParams(): Promise<{ slug: string }[]> {
@@ -39,7 +36,7 @@ export async function generateMetadata({
     : routeParams.slug || "";
 
   const posts = getPosts(["src", "app", "work", "projects"]);
-  let post = posts.find((post) => post.slug === slugPath);
+  const post = posts.find((post) => post.slug === slugPath);
 
   if (!post) return {};
 
@@ -62,16 +59,11 @@ export default async function Project({
     ? routeParams.slug.join("/")
     : routeParams.slug || "";
 
-  let post = getPosts(["src", "app", "work", "projects"]).find((post) => post.slug === slugPath);
+  const post = getPosts(["src", "app", "work", "projects"]).find((post) => post.slug === slugPath);
 
   if (!post) {
     notFound();
   }
-
-  const avatars =
-    post.metadata.team?.map((person) => ({
-      src: person.avatar,
-    })) || [];
 
   return (
     <Column as="section" maxWidth="m" horizontal="center" gap="l">
@@ -94,43 +86,42 @@ export default async function Project({
       />
       <Column maxWidth="s" gap="16" horizontal="center" align="center">
         <SmartLink href="/work">
-          <Text variant="label-strong-m">Projects</Text>
+          <Text variant="label-strong-m">Work</Text>
         </SmartLink>
         <Text variant="body-default-xs" onBackground="neutral-weak" marginBottom="12">
           {post.metadata.publishedAt && formatDate(post.metadata.publishedAt)}
         </Text>
         <Heading variant="display-strong-m">{post.metadata.title}</Heading>
       </Column>
-      <Row marginBottom="32" horizontal="center">
-        <Row gap="16" vertical="center">
-          {post.metadata.team && <AvatarGroup reverse avatars={avatars} size="s" />}
-          <Text variant="label-default-m" onBackground="brand-weak">
-            {post.metadata.team?.map((member, idx) => (
-              <span key={idx}>
-                {idx > 0 && (
-                  <Text as="span" onBackground="neutral-weak">
-                    ,{" "}
-                  </Text>
-                )}
-                <SmartLink href={member.linkedIn}>{member.name}</SmartLink>
-              </span>
-            ))}
-          </Text>
-        </Row>
-      </Row>
       {post.metadata.images.length > 0 && (
         <Media priority aspectRatio="16 / 9" radius="m" alt="image" src={post.metadata.images[0]} />
+      )}
+      {post.metadata.tags && post.metadata.tags.length > 0 && (
+        <Flex style={{width: "100%", maxWidth: "640px", margin: "0 auto"}} wrap gap="8">
+          {post.metadata.tags.slice(0, 5).map((tag) => (
+            <Tag key={tag} size="m" label={tag} paddingX="16" paddingY="8" />
+          ))}
+        </Flex>
       )}
       <Column style={{ margin: "auto" }} as="article" maxWidth="xs">
         <CustomMDX source={post.content} />
       </Column>
-      <Column fillWidth gap="40" horizontal="center" marginTop="40">
-        <Line maxWidth="40" />
-        <Heading as="h2" variant="heading-strong-xl" marginBottom="24">
-          Related projects
-        </Heading>
-        <Projects exclude={[post.slug]} range={[2]} />
-      </Column>
+      {(() => {
+        const currentTags = post.metadata.tags?.slice(0, 5) ?? [];
+        const hasRelated = getPosts(["src", "app", "work", "projects"]).some(
+          (p) => p.slug !== post.slug && (p.metadata.tags || []).some((t) => currentTags.includes(t))
+        );
+        if (!hasRelated) return null;
+        return (
+          <Column fillWidth gap="40" horizontal="center" marginTop="40">
+            <Line maxWidth="40" />
+            <Heading as="h2" variant="heading-strong-xl" marginBottom="24">
+              Related projects
+            </Heading>
+            <Projects exclude={[post.slug]} range={[1, 3]} relatedTags={currentTags} />
+          </Column>
+        );
+      })()}
       <ScrollToHash />
     </Column>
   );

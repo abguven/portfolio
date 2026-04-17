@@ -1,0 +1,49 @@
+---
+title: "Medical Data ETL Pipeline"
+publishedAt: "2025-10-03"
+summary: "Production-grade ETL pipeline migrating patient hospitalization data from CSV into MongoDB — dual NoSQL modeling strategies, role-based auth, and full Docker containerization."
+images:
+  - "/images/projects/p5/cover.png"
+link: "https://github.com/abguven/medical-data-etl-pipeline"
+tags: ["mongodb", "data-modeling", "docker", "python", "etl-pipeline", "pandas", "data-engineering"]
+---
+
+## TL;DR
+
+- **The Problem:** A client needed to migrate a medical dataset from flat CSV files to a modern, scalable NoSQL storage — with security, reproducibility, and flexibility on the data model.
+- **The Solution:** A fully containerized ETL pipeline supporting two MongoDB modeling strategies (embedding vs. reference), switchable via a single config variable, with role-based authentication built in from day one.
+- **The Impact:** A fully reproducible environment with zero manual setup — `docker compose up` and it runs.
+
+## The Architecture
+
+Three Docker services on a private `etl-network`:
+
+- **`etl-app`** — Python ETL container, waits for MongoDB health check before starting
+- **`mongo`** — MongoDB 7.0 with persistent volume and auto-initialized users via JS init script
+- **`mongo-express`** — web admin interface for development and debugging
+
+A key insight from data profiling: the source dataset represents **hospitalizations**, not unique patients. One patient can have multiple records. This changed the entire modeling strategy.
+
+**Embedding model** — hospitalizations stored as a nested array inside each patient document. One read returns the full patient history. Best for read-heavy workloads.
+
+**Reference model** — two separate collections linked via `patient_id`, joined at read time via `$lookup`. Best for frequent updates or very large hospitalization histories.
+
+![Docker Compose architecture](https://raw.githubusercontent.com/abguven/medical-data-etl-pipeline/main/assets/docker-compose-architecture.png)
+
+![Embedding vs Reference schema](https://raw.githubusercontent.com/abguven/medical-data-etl-pipeline/main/assets/embedding_schema.png)
+
+## Engineering Highlights
+
+**Embedding vs. Reference — a real architectural decision** — This wasn't a theoretical choice. The source data had patients with dozens of hospitalization records. Embedding keeps reads simple but balloons document size over time. Reference normalizes data but requires `$lookup` on every query. The pipeline supports both so the client can choose — and switch — based on their actual access patterns.
+
+**Security by design** — Two distinct MongoDB users created at init time: an ETL user (`readWrite`) and an analyst user (`read-only`). Passwords are never stored in plain text — MongoDB handles SCRAM-SHA-256 hashing natively. Analysts can never accidentally modify production data.
+
+**Reproducibility as a first-class concern** — The entire stack — MongoDB init scripts, user creation, schema setup, ETL execution — runs from a single `docker compose up`. No manual steps, no environment drift between runs.
+
+## Results
+
+- Two fully functional NoSQL data models implemented and validated
+- Zero manual configuration after `docker compose up`
+- Data deduplication and structural validation enforced before any MongoDB write
+
+👉 [Explore the complete code and documentation on GitHub.](https://github.com/abguven/medical-data-etl-pipeline)

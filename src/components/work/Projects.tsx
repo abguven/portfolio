@@ -5,19 +5,27 @@ import { ProjectCard } from "@/components";
 interface ProjectsProps {
   range?: [number, number?];
   exclude?: string[];
+  relatedTags?: string[];
 }
 
-export function Projects({ range, exclude }: ProjectsProps) {
+export function Projects({ range, exclude, relatedTags }: ProjectsProps) {
   let allProjects = getPosts(["src", "app", "work", "projects"]);
 
-  // Exclude by slug (exact match)
   if (exclude && exclude.length > 0) {
     allProjects = allProjects.filter((post) => !exclude.includes(post.slug));
   }
 
-  const sortedProjects = allProjects.sort((a, b) => {
-    return new Date(b.metadata.publishedAt).getTime() - new Date(a.metadata.publishedAt).getTime();
-  });
+  const sortedProjects = relatedTags && relatedTags.length > 0
+    ? allProjects
+        .filter((p) => (p.metadata.tags || []).some((t) => relatedTags.includes(t)))
+        .sort((a, b) => {
+          const sharedA = (a.metadata.tags || []).filter((t) => relatedTags.includes(t)).length;
+          const sharedB = (b.metadata.tags || []).filter((t) => relatedTags.includes(t)).length;
+          return sharedB - sharedA;
+        })
+    : allProjects.sort((a, b) =>
+        new Date(b.metadata.publishedAt).getTime() - new Date(a.metadata.publishedAt).getTime()
+      );
 
   const displayedProjects = range
     ? sortedProjects.slice(range[0] - 1, range[1] ?? sortedProjects.length)

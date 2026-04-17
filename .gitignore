@@ -38,3 +38,16 @@ next-env.d.ts
 # local working folders
 /docs
 /sandbox
+/projects
+
+# IDE
+/.idea
+/.vscode
+
+# OS
+Thumbs.db
+
+# images raw/working files
+/public/images/projects/raw
+/public/images/projects/perso/*.psd
+/public/images/projects/p2/*.psd

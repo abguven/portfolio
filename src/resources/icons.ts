@@ -1,4 +1,4 @@
-import { IconType } from "react-icons";
+import type { IconType } from "react-icons";
 
 import {
   HiArrowUpRight,
@@ -27,7 +27,28 @@ import {
   SiNextdotjs,
   SiFigma,
   SiSupabase,
+  SiSalesforce,
+  SiPython,
+  SiPolars,
+  SiApachespark,
+  SiApachekafka,
+  SiApacheairflow,
+  SiPostgresql,
+  SiMongodb,
+  SiDocker,
+  SiAmazonwebservices,
+  SiTerraform,
+  SiScikitlearn,
+  SiPandas,
+  SiDelta,
+  SiDuckdb,
+  SiAirbyte,
+  SiTalend,
+  SiLangchain,
+  SiBentoml,
 } from "react-icons/si";
+
+import { DiMsqlServer } from "react-icons/di";
 
 import { FaDiscord, FaGithub, FaLinkedin, FaX, FaThreads, FaInstagram, FaXTwitter, FaFacebook, FaPinterest, FaWhatsapp, FaReddit, FaTelegram, } from "react-icons/fa6";
 
@@ -64,6 +85,26 @@ export const iconLibrary: Record<string, IconType> = {
   reddit: FaReddit,
   telegram: FaTelegram,
   instagram: FaInstagram,
+  salesforce: SiSalesforce,
+  python: SiPython,
+  spark: SiApachespark,
+  kafka: SiApachekafka,
+  airflow: SiApacheairflow,
+  postgresql: SiPostgresql,
+  mongodb: SiMongodb,
+  docker: SiDocker,
+  aws: SiAmazonwebservices,
+  terraform: SiTerraform,
+  scikitlearn: SiScikitlearn,
+  pandas: SiPandas,
+  polars: SiPolars,
+  delta: SiDelta,
+  duckdb: SiDuckdb,
+  airbyte: SiAirbyte,
+  talend: SiTalend,
+  langchain: SiLangchain,
+  bentoml: SiBentoml,
+  mssql: DiMsqlServer,
 };
 
 export type IconLibrary = typeof iconLibrary;

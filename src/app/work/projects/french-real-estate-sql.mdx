@@ -1,0 +1,47 @@
+---
+title: "French Real Estate SQL POC"
+publishedAt: "2025-08-18"
+summary: "End-to-end data engineering POC: ingesting, cleaning, and querying 34K+ French real estate transactions using pandas, SQLAlchemy, and SQL Server."
+images:
+  - "/images/projects/p3/cover.png"
+link: "https://github.com/abguven/french-real-estate-sql-poc"
+tags: ["sql", "sql-server", "relational-databases", "normalization", "python", "etl", "sqlalchemy", "pandas", "data-engineering"]
+---
+
+## TL;DR
+
+- **The Problem:** French government open data on 34K+ real estate transactions was split across 3 disconnected files with no shared primary key — completely unusable for SQL queries as-is.
+- **The Solution:** Engineer a join key from scratch, build a 3NF relational schema, load it into SQL Server via SQLAlchemy, and answer 12 business questions through a central analytical view.
+- **The Impact:** A fully queryable database with 31,378 apartment transactions, revealing that Paris averages **€12,056/m²** and Île-de-France accounts for **45% of all sales**.
+
+## The Architecture
+
+Classic ETL across 3 government source files:
+
+- **Valeurs foncières** — 34,169 rows of property transaction records (price, surface, address, type)
+- **Données communes** — 34,991 French communes with department and population data
+- **Référentiels Géographiques** — regional geographic reference file
+
+The core challenge: **no shared primary key**. A `code_insee` join key was engineered from scratch by combining `code_departement` and `code_commune`, with specific edge-case handling for DOM-TOM overseas territories (195 rows where `code_departement` had 3 digits instead of 2). Result: **100% coverage on all 34,169 rows**.
+
+Schema modeled in 3NF with SQL Power Architect, loaded via SQLAlchemy with integrity constraints (PK, FK, CHECK), and exposed through a central view `V_Transactions_Completes` reused by all 12 analytical queries.
+
+![Architecture flow](https://raw.githubusercontent.com/abguven/french-real-estate-sql-poc/main/assets/architecture_flow.png)
+
+## Engineering Highlights
+
+**GDPR compliance by design** — Buyer name columns excluded at the pandas stage, before any data reached the database. Not a post-hoc cleanup — a deliberate pipeline design decision.
+
+**Nullable `valeur_fonciere`** — 18 NULL rows were donations and non-monetary transactions. Forcing NULL to 0 would have silently corrupted AVG() and SUM() aggregations. A `CHECK (valeur_fonciere > 0 OR valeur_fonciere IS NULL)` constraint was added at the DB level to preserve analytical integrity while keeping the data honest.
+
+**Surface calculation centralized in SQL** — Houses and apartments use different surface metrics (`surface_locale` vs `surface_carrez`). Rather than duplicating this logic across 12 queries, a `CASE WHEN` expression inside `V_Transactions_Completes` handles it once for all consumers.
+
+## Results (H1 2020)
+
+- **31,378** apartment transactions recorded
+- **Île-de-France** = 45% of all apartment sales
+- **Paris (dept. 75)** = highest avg. price/m² at **€12,056**
+- **2–3 room apartments** = ~60% of all transactions
+- **Seasonal effect:** +3.66% transaction volume Q1 → Q2
+
+👉 [Explore the complete code and documentation on GitHub.](https://github.com/abguven/french-real-estate-sql-poc)

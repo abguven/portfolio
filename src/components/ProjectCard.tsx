@@ -49,9 +49,11 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
       >
         {title && (
           <Flex flex={5}>
-            <Heading as="h2" wrap="balance" variant="heading-strong-xl">
-              {title}
-            </Heading>
+            <SmartLink href={href} style={{ textDecoration: "none" }}>
+              <Heading as="h2" wrap="balance" variant="heading-strong-xl">
+                {title}
+              </Heading>
+            </SmartLink>
           </Flex>
         )}
         {(avatars?.length > 0 || description?.trim() || content?.trim()) && (
@@ -70,15 +72,6 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
                   href={href}
                 >
                   <Text variant="body-default-s">Read case study</Text>
-                </SmartLink>
-              )}
-              {link && (
-                <SmartLink
-                  suffixIcon="arrowUpRightFromSquare"
-                  style={{ margin: "0", width: "fit-content" }}
-                  href={link}
-                >
-                  <Text variant="body-default-s">View project</Text>
                 </SmartLink>
               )}
             </Flex>

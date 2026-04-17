@@ -1,0 +1,40 @@
+---
+title: "Sport Rewards Pipeline"
+publishedAt: "2026-03-11"
+summary: "End-to-end streaming pipeline automating employee sports benefits eligibility with real-time fraud detection."
+images:
+  - "/images/projects/p12/cover.png"
+link: "https://github.com/abguven/sport-rewards-pipeline"
+tags: ["apache-spark", "redpanda", "apache-airflow", "delta-lake", "debezium", "medallion-architecture", "data-engineering"]
+---
+
+## TL;DR
+
+- **The Problem:** A startup wanted to financially reward employees for cycling to work or doing sports, but relying on self-declarations created a massive fraud and overpayment risk.
+- **The Solution:** An automated streaming pipeline that ingests Strava activities, cross-references them with Google Maps GPS data, and calculates strict eligibility through a Medallion Architecture.
+- **The Impact:** Exposed a **40% gap** between declared and verified activities, saving the business **€69,670** in simulated overpayments.
+
+## The Architecture
+
+![Architecture Overview](https://raw.githubusercontent.com/abguven/sport-rewards-pipeline/main/assets/pipeline-overview.png)
+
+## Engineering Highlights
+
+**Zero-Impact CDC Streaming** — Used Debezium to read PostgreSQL's WAL via logical replication. Data is sent to Redpanda instantly without polling or slowing down the source database.
+
+**Chaos Engineering & Data Quality** — Injected a Chaos Monkey (future dates, impossible speeds) into the simulator. Great Expectations gates the Bronze layer, isolating bad data without crashing the streaming job.
+
+**Decoupled Business Logic** — All rules (bonus rates, distance limits) are stored in an external JSON file. The Finance team can update a threshold and Spark applies it instantly — no code change or Docker rebuild required.
+
+**Smart AI Notifications** — An Airflow batch triggers Mistral AI bi-weekly to generate a pool of natural-language Slack messages, preventing alert fatigue.
+
+## Results
+
+By pushing the Gold-layer data to Power BI, HR and Finance were provided with a real-time audit tool rather than a spreadsheet.
+
+> **Financial Snapshot — 12-month simulation, 161 employees**
+> - Declarative payout: €172,480
+> - GPS-verified payout: €102,810
+> - **Fraud / Error Risk detected: €69,670**
+
+👉 [Explore the complete code and documentation on GitHub.](https://github.com/abguven/sport-rewards-pipeline)
