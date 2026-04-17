@@ -16,7 +16,7 @@ tags: ["python", "pandas", "scikit-learn", "exploratory-data-analysis", "data-vi
 
 ## The 3-Stage Pipeline
 
-![Indicator selection funnel — 3,665 → 15 → 6](/images/projects/p2/pipeline_funnel.png)
+![Indicator selection funnel — 3,665 → 15 → 6](https://raw.githubusercontent.com/abguven/edtech-market-expansion-eda/main/assets/pipeline_funnel.png)
 
 **Stage 1 — Business Filter** — Retained only indicators directly relevant to the EdTech question: internet infrastructure (can users connect?), population dynamics (is the youth market growing?), and education expenditure (does society already invest in education?).
 
@@ -24,7 +24,7 @@ tags: ["python", "pandas", "scikit-learn", "exploratory-data-analysis", "data-vi
 
 **Stage 3 — Statistical Filter** — Spearman correlation detected redundancy. Any pair with |r| > 0.70 was flagged; the less business-relevant indicator was dropped. Result: 6 statistically independent signals.
 
-![Correlation after deduplication — 6×6, near-zero off-diagonal](/images/projects/p2/correlation_after.png)
+![Correlation after deduplication — 6×6, near-zero off-diagonal](https://raw.githubusercontent.com/abguven/edtech-market-expansion-eda/main/assets/correlation_after.png)
 
 ## Scoring Model
 
@@ -40,7 +40,7 @@ Each country scored via a normalized weighted average (MinMaxScaler), with every
 
 > `SL.UEM.TOTL.ZS` (unemployment) deliberately excluded — it can signal both instability and demand for retraining. Including it would have introduced noise rather than signal.
 
-![Top 5 countries by market potential score](/images/projects/p2/top5_countries.png)
+![Top 5 countries by market potential score](https://raw.githubusercontent.com/abguven/edtech-market-expansion-eda/main/assets/top5_countries.png)
 
 ## Results — Two Strategic Profiles
 

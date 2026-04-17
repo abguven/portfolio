@@ -45,6 +45,7 @@ export default async function RootLayout({
       )}
     >
       <head>
+        <meta name="color-scheme" content="light dark" />
         <script
           id="theme-init"
           dangerouslySetInnerHTML={{

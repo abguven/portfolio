@@ -14,7 +14,7 @@ const person: Person = {
 };
 
 const newsletter: Newsletter = {
-  display: true,
+  display: false,
   title: <>Subscribe to {person.firstName}'s Newsletter</>,
   description: <>My weekly newsletter about creativity and engineering</>,
 };
@@ -163,7 +163,7 @@ const about: About = {
           <>
             <strong>Expert en Ingénierie des Données</strong> — RNCP Level 7 (Master equivalent)<br />
             June 2025 – June 2026 · ongoing<br />
-            Intensive program via 13 Big Data, Cloud, MLOps and Data Engineering architecture projects.
+            Intensive program via 12 Big Data, Cloud, MLOps and Data Engineering architecture projects.
           </>
         ),
       },
@@ -257,7 +257,7 @@ const work: Work = {
   path: "/work",
   label: "Work",
   title: `Projects – ${person.name}`,
-  description: `Design and dev projects by ${person.name}`,
+  description: `Data engineering projects by ${person.name}`,
   // Create new project pages by adding a new .mdx file to app/blog/posts
   // All projects will be listed on the /home and /work routes
 };
