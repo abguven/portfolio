@@ -125,7 +125,7 @@ const about: About = {
         images: [],
       },
       {
-        company: "Cyncly (ex-Compusoft)",
+        company: "Cyncly",
         timeframe: "October 2022 - September 2024",
         role: "Analyst Programmer — Salesforce & R&D Innovation",
         achievements: [

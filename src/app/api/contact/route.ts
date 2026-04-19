@@ -4,10 +4,27 @@ import { NextRequest, NextResponse } from "next/server";
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: NextRequest) {
-  const { name, email, message } = await req.json();
+  const { name, email, message, honeypot, turnstileToken } = await req.json();
+
+  if (honeypot) {
+    return NextResponse.json({ success: true });
+  }
 
   if (!name || !email || !message) {
     return NextResponse.json({ error: "All fields are required." }, { status: 400 });
+  }
+
+  const verifyRes = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      secret: process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY,
+      response: turnstileToken,
+    }),
+  });
+  const verifyData = await verifyRes.json();
+  if (!verifyData.success) {
+    return NextResponse.json({ error: "Bot verification failed." }, { status: 403 });
   }
 
   const { error } = await resend.emails.send({
