@@ -1,11 +1,11 @@
 "use client";
 
+import Image from "next/image";
 import {
   AvatarGroup,
   Column,
   Flex,
   Heading,
-  Media,
   SmartLink,
   Text,
 } from "@once-ui-system/core";
@@ -34,16 +34,16 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
   return (
     <Column fillWidth gap="m">
       <SmartLink href={href} style={{ display: "block", width: "100%", textDecoration: "none" }}>
-        <Media
-          fillWidth
-          priority={priority}
-          aspectRatio="16/9"
-          sizes="(max-width: 960px) 100vw, 960px"
-          src={images[0]}
-          alt={title}
-          radius="l"
-          border="neutral-alpha-weak"
-        />
+        <div style={{ position: "relative", aspectRatio: "16/9", width: "100%", borderRadius: "var(--radius-l)", overflow: "hidden", border: "1px solid var(--neutral-alpha-weak)" }}>
+          <Image
+            src={images[0]}
+            alt={title}
+            fill
+            priority={priority}
+            sizes="(max-width: 960px) 100vw, 960px"
+            style={{ objectFit: "cover" }}
+          />
+        </div>
       </SmartLink>
       <Flex
         s={{ direction: "column" }}
