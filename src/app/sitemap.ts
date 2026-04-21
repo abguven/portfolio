@@ -21,5 +21,7 @@ export default async function sitemap() {
     lastModified: new Date().toISOString().split("T")[0],
   }));
 
-  return [...routes, ...blogs, ...works];
+  const activeBlogPosts = routesConfig["/blog" as keyof typeof routesConfig] ? blogs : [];
+
+  return [...routes, ...activeBlogPosts, ...works];
 }

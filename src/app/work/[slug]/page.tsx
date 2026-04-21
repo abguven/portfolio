@@ -94,7 +94,7 @@ export default async function Project({
         <Heading variant="display-strong-m">{post.metadata.title}</Heading>
       </Column>
       {post.metadata.images.length > 0 && (
-        <Media priority aspectRatio="16 / 9" radius="m" alt="image" src={post.metadata.images[0]} />
+        <Media priority aspectRatio="16 / 9" radius="m" alt={post.metadata.summary || post.metadata.title} src={post.metadata.images[0]} />
       )}
       {post.metadata.tags && post.metadata.tags.length > 0 && (
         <Flex style={{width: "100%", maxWidth: "640px", margin: "0 auto"}} wrap gap="8">

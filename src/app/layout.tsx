@@ -14,6 +14,8 @@ import {
   SpacingToken,
 } from "@once-ui-system/core";
 import { Footer, Header, RouteGuard, Providers } from "@/components";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/next";
 import { baseURL, effects, fonts, style, dataStyle, home } from "@/resources";
 
 export async function generateMetadata() {
@@ -164,6 +166,8 @@ export default async function RootLayout({
             </Flex>
           </Flex>
           <Footer />
+          <SpeedInsights />
+          <Analytics />
         </Column>
       </Providers>
     </Flex>
