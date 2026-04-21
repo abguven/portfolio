@@ -2,10 +2,10 @@
 
 import {
   AvatarGroup,
-  Carousel,
   Column,
   Flex,
   Heading,
+  Media,
   SmartLink,
   Text,
 } from "@once-ui-system/core";
@@ -33,14 +33,16 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
 }) => {
   return (
     <Column fillWidth gap="m">
-      <SmartLink href={href} style={{ display: "block", textDecoration: "none" }}>
-        <Carousel
+      <SmartLink href={href} style={{ display: "block", width: "100%", textDecoration: "none" }}>
+        <Media
+          fillWidth
           priority={priority}
+          aspectRatio="16/9"
           sizes="(max-width: 960px) 100vw, 960px"
-          items={images.map((image) => ({
-            slide: image,
-            alt: title,
-          }))}
+          src={images[0]}
+          alt={title}
+          radius="l"
+          border="neutral-alpha-weak"
         />
       </SmartLink>
       <Flex
