@@ -132,23 +132,29 @@ function createCodeBlock(props: any) {
     const label = language.charAt(0).toUpperCase() + language.slice(1);
 
     return (
-      <CodeBlock
-        marginTop="8"
-        marginBottom="16"
-        codes={[
-          {
-            code: children,
-            language,
-            label,
-          },
-        ]}
-        copyButton={true}
-      />
+      <div style={{ maxWidth: "100%", overflowX: "auto", borderRadius: "8px" }}>
+        <CodeBlock
+          marginTop="8"
+          marginBottom="16"
+          codes={[
+            {
+              code: children,
+              language,
+              label,
+            },
+          ]}
+          copyButton={true}
+        />
+      </div>
     );
   }
 
   // Fallback for other pre tags or empty code blocks
-  return <pre {...props} />;
+  return (
+    <div style={{ maxWidth: "100%", overflowX: "auto" }}>
+      <pre {...props} />
+    </div>
+  );
 }
 
 function createList(as: "ul" | "ol") {
@@ -165,8 +171,8 @@ function createListItem({ children }: { children: ReactNode }) {
 
 function createTable({ children }: { children: ReactNode }) {
   return (
-    <div style={{ overflowX: "auto", marginTop: "16px", marginBottom: "16px" }}>
-      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "14px" }}>
+    <div style={{ overflowX: "auto", width: "100%", maxWidth: "100%", marginTop: "16px", marginBottom: "16px" }}>
+      <table style={{ minWidth: "100%", borderCollapse: "collapse", fontSize: "14px", whiteSpace: "nowrap" }}>
         {children}
       </table>
     </div>
@@ -183,7 +189,7 @@ function createTh({ children }: { children: ReactNode }) {
 
 function createTd({ children }: { children: ReactNode }) {
   return (
-    <td style={{ padding: "8px 12px", borderBottom: "1px solid var(--neutral-alpha-weak)" }}>
+    <td style={{ padding: "8px 12px", borderBottom: "1px solid var(--neutral-alpha-weak)", whiteSpace: "normal", wordBreak: "break-word" }}>
       {children}
     </td>
   );
