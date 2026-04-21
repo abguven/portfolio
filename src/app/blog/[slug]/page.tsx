@@ -44,13 +44,24 @@ export async function generateMetadata({
 
   if (!post) return {};
 
-  return Meta.generate({
+  const metadata: any = Meta.generate({
     title: post.metadata.title,
     description: post.metadata.summary,
     baseURL: baseURL,
     image: post.metadata.image || `/api/og/generate?title=${post.metadata.title}`,
     path: `${blog.path}/${post.slug}`,
   });
+
+  if (post.metadata.image) {
+    metadata.other = {
+      ...metadata.other,
+      rel: "preload",
+      as: "image",
+      href: post.metadata.image,
+    };
+  }
+
+  return metadata;
 }
 
 export default async function Blog({ params }: { params: Promise<{ slug: string | string[] }> }) {

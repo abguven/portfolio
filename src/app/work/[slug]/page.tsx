@@ -40,13 +40,24 @@ export async function generateMetadata({
 
   if (!post) return {};
 
-  return Meta.generate({
+  const metadata: any = Meta.generate({
     title: post.metadata.title,
     description: post.metadata.summary,
     baseURL: baseURL,
     image: post.metadata.image || `/api/og/generate?title=${post.metadata.title}`,
     path: `${work.path}/${post.slug}`,
   });
+
+  if (post.metadata.images.length > 0) {
+    metadata.other = {
+      ...metadata.other,
+      rel: "preload",
+      as: "image",
+      href: post.metadata.images[0],
+    };
+  }
+
+  return metadata;
 }
 
 export default async function Project({
