@@ -19,13 +19,18 @@ import { Analytics } from "@vercel/analytics/next";
 import { baseURL, effects, fonts, style, dataStyle, home } from "@/resources";
 
 export async function generateMetadata() {
-  return Meta.generate({
-    title: home.title,
-    description: home.description,
-    baseURL: baseURL,
-    path: home.path,
-    image: home.image,
-  });
+  return {
+    ...Meta.generate({
+      title: home.title,
+      description: home.description,
+      baseURL: baseURL,
+      path: home.path,
+      image: home.image,
+    }),
+    verification: {
+      google: "An5QOHwvltBjoQQLFN9EXZwVKpRqslOgzobPRPgUfEs",
+    },
+  };
 }
 
 export default async function RootLayout({
