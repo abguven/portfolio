@@ -207,7 +207,7 @@ const about: About = {
       },
       {
         title: "Orchestration & Cloud Infrastructure",
-        description: <>AWS (S3, ECS, Lambda, Redshift), Terraform, Apache Airflow, Kestra, Airbyte, Docker, CI/CD.</>,
+        description: <>AWS (S3, S3Vectors, ECS, EC2, Lambda, Bedrock, DynamoDB), Terraform, Apache Airflow, Kestra, Airbyte, Docker, CI/CD.</>,
         tags: [
           { name: "AWS", icon: "aws" },
           { name: "Terraform", icon: "terraform" },

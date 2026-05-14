@@ -1,0 +1,59 @@
+---
+title: "Puls Events RAG — AWS MVP Architecture Blueprint"
+publishedAt: "2026-05-14"
+summary: "Architecture study for scaling a RAG chatbot POC into a production-ready geo-aware conversational agent on AWS — Amazon Bedrock, S3 Vectors, ECS Fargate, FastAPI, and DynamoDB."
+images:
+  - "/images/projects/p13/cover.webp"
+link: "https://github.com/abguven/puls-events-rag-mvp"
+tags: ["rag", "llm", "amazon-bedrock", "langchain", "aws", "aws-s3", "ecs", "dynamodb", "fastapi", "python", "architecture", "cloud-infrastructure", "data-engineering"]
+---
+
+## TL;DR
+
+- **The Problem:** The [RAG POC](/work/puls-events-rag) validated the core concept but couldn't go to production: no conversational memory, no geo-awareness, a static in-memory FAISS index prone to hallucinations, and zero observability.
+- **The Solution:** A full architecture and project management study designing the MVP on AWS — async FastAPI backend on ECS Fargate, Amazon Bedrock for LLM inference, S3 Vectors for semantic search, and DynamoDB for session continuity.
+- **The Impact:** A production-ready blueprint with a line-by-line cost breakdown (~$39/month non-LLM infrastructure), a 10-week delivery roadmap, and documented architecture decisions that cut projected storage costs by 730×.
+
+## From POC to MVP — What Changed
+
+The POC was a working demo. The MVP is a deployable system. Four structural gaps had to be closed:
+
+| Gap | POC | MVP |
+|---|---|---|
+| Memory | Stateless — each query starts fresh | DynamoDB session store, 30-day TTL |
+| Geo-awareness | None | Date Resolver + location-aware retrieval tool |
+| Vector store | In-memory FAISS, rebuilt on restart | S3 Vectors — persistent, filterable, AWS-native |
+| Observability | None | CloudWatch + Athena + QuickSight |
+
+## Architecture
+
+Six functional layers, each with a defined AWS surface:
+
+| Layer | Role | Services |
+|---|---|---|
+| Presentation | Static UI delivery | S3, CloudFront |
+| API | Routing & authentication | API Gateway HTTP, Cognito JWT |
+| Backend | Agent orchestration | ECS Fargate, FastAPI, LangChain |
+| Data | Vector & session storage | S3 Vectors, DynamoDB (3 tables) |
+| Intelligence | LLM inference & embeddings | Amazon Bedrock (Claude Haiku 4.5, Titan V2) |
+| Ingestion | Knowledge base updates | Lambda + EventBridge Scheduler |
+| Monitoring | Observability | CloudWatch, Athena, QuickSight |
+
+## Engineering Highlights
+
+**S3 Vectors over OpenSearch Serverless — 730× cheaper** — OpenSearch Serverless has a hard floor of ~$345/month regardless of traffic. S3 Vectors costs ~$0.47/month at MVP scale, with native metadata filtering during vector search. At this budget range, it's not a trade-off — it's the only rational choice.
+
+**Async LangChain under Bedrock latency** — The synchronous POC blocked a worker thread for ~15 seconds per Bedrock call. Migrating to `.ainvoke()` with asyncio lets a single Fargate instance interleave multiple concurrent requests during model inference waits — horizontal scaling deferred until load actually justifies it.
+
+**VPC Link + Cloud Map, no ALB** — API Gateway integrates directly with ECS tasks via VPC Link and AWS Cloud Map service discovery. Tasks self-register on startup. This eliminates the Application Load Balancer's ~$16/month fixed cost — meaningful against a ~$39/month non-LLM infrastructure budget.
+
+**Streamlit → React/Vite** — Streamlit is a fast prototyping tool, not a frontend. The MVP requires a Cognito authentication flow, GDPR consent banners, and static asset hosting on S3/CloudFront. React/Vite compiled to static files handles all three without an always-on server.
+
+**Session memory cost is documented, not ignored** — Injecting conversation history adds ~9,750 tokens per query across ~4.8 LLM invocations per turn. This is accepted for MVP. A V2 optimization (TOP_K: 20 → 5) is already scoped, cutting ~60% of LLM token costs without architectural changes.
+
+## Deliverables
+
+- Full architecture and project management report (MoSCoW backlog, sprint planning, risk matrix)
+- Line-by-line AWS cost estimation with per-service formulas
+
+👉 [Read the full architecture study on GitHub.](https://github.com/abguven/puls-events-rag-mvp)
