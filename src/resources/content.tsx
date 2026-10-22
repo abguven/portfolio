@@ -7,7 +7,7 @@ const person: Person = {
   name: `Abdulkadir GUVEN`,
   role: "Data Engineer",
   avatar: "/images/avatar.jpg",
-  email: "abguven@gmail.com",
+  email: "cv@abguven.eu",
   location: "Europe/Paris", // Expecting the IANA time zone identifier, e.g., 'Europe/Vienna'
   city: "Grand Est, France",
   languages: [ "French", "English", "Turkish"], 
@@ -107,13 +107,23 @@ const about: About = {
     title: "Work Experience",
     experiences: [
       {
+        company: "Prodor Plus",
+        timeframe: "June 2026",
+        role: "Data Engineer Intern",
+        achievements: [
+          "Market basket analysis (Apriori) and ABC classification in Python on a catalog of about 8,000 products, results reported in Power BI.",
+          "ETL pipeline industrialized on Azure with Terraform (14 resources, Docker, Container Apps), with no prior Azure experience.",
+        ],
+        images: [],
+      },
+      {
         company: "OpenClassrooms",
-        timeframe: "June 2025 - Present",
+        timeframe: "June 2025 - June 2026",
         role: "Data Engineer (Intensive Project-Based Training)",
         achievements: [
           <>
-            Designed and deployed 12 production-ready data architectures covering Batch, Streaming,
-            NoSQL, and Cloud (AWS, Docker, Kestra).
+            Completed 13 projects, including production-ready data architectures covering Batch,
+            Streaming, NoSQL, and Cloud (AWS, Docker, Kestra).
           </>,
           <>
             Implemented robust ETL pipelines: from local scripts to scalable Cloud architectures,
@@ -131,10 +141,10 @@ const about: About = {
         achievements: [
           <>
             Designed and maintained ETL pipelines via Talend to synchronize data between Salesforce,
-            Zendesk, and the ERP. Automated monitoring and nightly jobs on Azure to guarantee
-            production data integrity.
+            Zendesk, and the ERP. Set up nightly automated tests on Azure DevOps across three
+            Salesforce environments, to catch regressions after each deployment.
           </>,
-          "R&D GenAI: developed an AI Companion (MVP, Top 5 internal innovation) connecting the OpenAI API to company data via RAG/Vector Stores, and a ChatterPrice prototype for querying Salesforce in natural language.",
+          "R&D GenAI: developed an AI Companion (MVP, Top 5 internal innovation) connecting the OpenAI API to company data via RAG/Vector Stores, and designed Chatterprise, a demo of an AI agent driving Salesforce in natural language (March 2024, six months before Salesforce announced Agentforce).",
           "Acquired 88 badges and 108,000+ points on Salesforce Trailhead alongside project missions.",
         ],
         images: [],
@@ -142,7 +152,7 @@ const about: About = {
       {
         company: "Guven Pub",
         timeframe: "2008 - October 2022",
-        role: "Managing Director",
+        role: "Business Owner",
         achievements: [
           <>
             Full company management for 14 years — client relations, business development, and
@@ -161,9 +171,9 @@ const about: About = {
         name: "OpenClassrooms",
         description: (
           <>
-            <strong>Expert en Ingénierie des Données</strong> — RNCP Level 7 (Master equivalent)<br />
-            June 2025 – June 2026 · ongoing<br />
-            Intensive program via 12 Big Data, Cloud, MLOps and Data Engineering architecture projects.
+            <strong>Expert en Ingénierie et Science des Données</strong> — RNCP Level 7 (Master equivalent)<br />
+            June 2025 – June 2026<br />
+            Intensive program via 13 Big Data, Cloud, MLOps and Data Engineering projects.
           </>
         ),
       },
@@ -229,7 +239,7 @@ const about: About = {
       },
       {
         title: "Software Engineering & AI",
-        description: <>Python (advanced), SQL, Talend, Salesforce APEX, scikit-learn, BentoML, RAG/LangChain, Faiss/Vector stores.</>,
+        description: <>Python, SQL, Talend, Salesforce APEX, scikit-learn, BentoML, RAG/LangChain, Faiss/Vector stores.</>,
         tags: [
           { name: "Python", icon: "python" },
           { name: "scikit-learn", icon: "scikitlearn" },
