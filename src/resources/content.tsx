@@ -96,7 +96,7 @@ const about: About = {
         I now design scalable data architectures in direct service of business challenges.
         <ul style={{marginTop: "16px", marginBottom: 0, paddingLeft: "20px", display: "flex", flexDirection: "column", gap: "8px"}}>
           <li><strong>Analytical mindset & Finance</strong> — Passionate about applied mathematics and a stock market investor since 2018, I approach data with a desire to understand the underlying mechanisms and logic behind its evolution.</li>
-          <li><strong>Bug hunter</strong> — Debugging and stress-testing systems is a genuine intellectual challenge. This rigor led to a contribution to scikit-learn (used by millions of Data Analysts), identifying a <a href="https://github.com/scikit-learn/scikit-learn/issues/32589" target="_blank" rel="noopener noreferrer">complex regression</a> that was subsequently <a href="https://github.com/scikit-learn/scikit-learn/pull/32592" target="_blank" rel="noopener noreferrer">fixed upstream</a>.</li>
+          <li><strong>Bug hunter</strong> — Debugging and stress-testing systems is a genuine intellectual challenge. This rigor led to a contribution to scikit-learn, a machine learning library used worldwide: I <a href="https://github.com/scikit-learn/scikit-learn/issues/32589" target="_blank" rel="noopener noreferrer">reported a bug</a> with a reproducible example, and a contributor <a href="https://github.com/scikit-learn/scikit-learn/pull/32592" target="_blank" rel="noopener noreferrer">fixed it</a> in the next release.</li>
           <li><strong>Cognitive empathy</strong> — I adopt a human-centered approach by systematically putting myself in the shoes of those who will use my data, deploy my solutions, or read my documentation.</li>
         </ul>
       </>
@@ -130,7 +130,7 @@ const about: About = {
             with data quality validation (Pydantic, Great Expectations) and distributed processing
             (Apache Spark, Kafka/Redpanda).
           </>,
-          "Discovered and documented a regression bug in scikit-learn, with the fix validated upstream for version 1.8.",
+          "Found a bug in scikit-learn's OneHotEncoder while building a machine learning model: a parameter did not behave as documented. Isolated it through a series of tests and reported it with a reproducible example (issue #32589); with some 1,600 issues open, a contributor confirmed it and proposed a fix within seven hours, shipped in version 1.8.",
         ],
         images: [],
       },
@@ -171,8 +171,8 @@ const about: About = {
         name: "OpenClassrooms",
         description: (
           <>
-            <strong>Expert en Ingénierie et Science des Données</strong> — RNCP Level 7 (Master equivalent)<br />
-            June 2025 – June 2026<br />
+            <strong>Expert en Ingénierie et Science des Données</strong> — Master's level degree (French RNCP Level 7)<br />
+            June 2025 – July 2026<br />
             Intensive program via 13 Big Data, Cloud, MLOps and Data Engineering projects.
           </>
         ),
@@ -181,8 +181,8 @@ const about: About = {
         name: "OpenClassrooms",
         description: (
           <>
-            <strong>Développeur Web</strong> — RNCP Level 5 (Bac+2)<br />
-            2021 – 2022<br />
+            <strong>Développeur Web</strong> — Associate degree level (French RNCP Level 5)<br />
+            Dec. 2021 – July 2022<br />
             Fullstack development (React, Angular, Node.js), REST API design, relational and NoSQL databases.
           </>
         ),
@@ -191,8 +191,8 @@ const about: About = {
         name: "Université Henri Poincaré",
         description: (
           <>
-            <strong>DUT Génie Électrique et Informatique Industrielle</strong><br />
-            2003 – 2005<br />
+            <strong>DUT Génie Électrique et Informatique Industrielle</strong> — Associate degree level<br />
+            Sept. 2003 – June 2005<br />
             Foundations in algorithms, automation and signal processing.
           </>
         ),
